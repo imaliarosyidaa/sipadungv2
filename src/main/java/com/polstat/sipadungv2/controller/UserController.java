@@ -37,8 +37,8 @@ public class UserController {
     @Autowired
     private UserService userService;
     
-    //@Secured("ADMIN")
-    @PreAuthorize("hasAuthority('ADMIN')")
+    //@Secured("MAHASISWA")
+    //@PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Get a List of Users")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200",description = "OK. Get all users successfully",

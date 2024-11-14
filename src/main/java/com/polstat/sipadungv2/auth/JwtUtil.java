@@ -11,6 +11,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -18,14 +21,22 @@ import org.springframework.security.core.userdetails.UserDetails;
 public class JwtUtil implements Serializable {
     @Value("${jwt.secret}")
     private String SECRET_KEY;
+    
     @Value("${jwt.expiration}")
     private long EXPIRE_DURATION;
     
     public String generateAccessToken(Authentication authentication) {
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        
+        // Membuat klaim untuk roles
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("roles", userDetails.getAuthorities().stream()
+                .map(authority -> authority.getAuthority())  // Menyertakan otoritas pengguna
+                .collect(Collectors.toList()));
+        
         return Jwts.builder()
         .setSubject(userDetails.getUsername())
-        .setIssuer("Polstat")
+        .setIssuer("Sipadungv2")
         .setIssuedAt(new Date())
         .setExpiration(new Date(System.currentTimeMillis() + EXPIRE_DURATION))
         .signWith(SignatureAlgorithm.HS512, SECRET_KEY)
@@ -57,8 +68,8 @@ public class JwtUtil implements Serializable {
     
     private Claims parseClaims(String token) {
         return Jwts.parser()
-        .setSigningKey(SECRET_KEY)
-        .parseClaimsJws(token)
-        .getBody();
+                .setSigningKey(SECRET_KEY)
+                .parseClaimsJws(token)
+                .getBody();
     }
 }

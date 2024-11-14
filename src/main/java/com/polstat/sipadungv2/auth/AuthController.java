@@ -47,10 +47,14 @@ public class AuthController {
         );
 
         String accessToken = jwtUtil.generateAccessToken(authentication);
+        
         AuthResponse response = new AuthResponse(request.getEmail(), accessToken);
+        
         return ResponseEntity.ok().body(response);
+        
         } catch (BadCredentialsException ex) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("Invalid credetentials provided");
         }
         
     }

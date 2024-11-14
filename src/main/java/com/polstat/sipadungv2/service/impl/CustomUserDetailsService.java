@@ -1,8 +1,13 @@
 package com.polstat.sipadungv2.service.impl;
 
+import com.polstat.sipadungv2.entity.Role;
 import com.polstat.sipadungv2.entity.User;
 import com.polstat.sipadungv2.repository.UserRepository;
+import java.util.Collection;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -16,14 +21,19 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         User user = userRepository.findByEmail(email);
-        if (user == null) {
-            throw new UsernameNotFoundException("User not found with username: " +
-            email);
+        if (user != null) {
+            return new org.springframework.security.core.userdetails.User(user.getEmail(),
+                    user.getPassword(),
+                    mapRolesToAuthorities((Collection<Role>) user.getRoles()));
+        }else{
+            throw new UsernameNotFoundException("Invalid username or password.");
         }
-        UserDetails userDetails = org.springframework.security.core.userdetails.User.builder()
-        .username(user.getEmail())
-        .password(user.getPassword())
-        .build();
-        return userDetails;
+    }
+    
+    private Collection < ? extends GrantedAuthority> mapRolesToAuthorities(Collection <Role> roles) {
+        Collection < ? extends GrantedAuthority> mapRoles = roles.stream()
+                .map(role -> new SimpleGrantedAuthority(role.getName().name()))
+                .collect(Collectors.toList());
+        return mapRoles;
     }
 }

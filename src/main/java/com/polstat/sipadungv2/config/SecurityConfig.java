@@ -13,6 +13,7 @@ import static org.springframework.http.HttpMethod.GET;
 import org.springframework.security.authentication.AuthenticationManager;
 import static org.springframework.security.authorization.AuthorityAuthorizationManager.hasAnyRole;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -22,7 +23,10 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
-@EnableWebSecurity
+@EnableMethodSecurity(
+    prePostEnabled = true,
+    securedEnabled = true
+)
 public class SecurityConfig {
 
     @Autowired private JwtFilter jwtTokenFilter;
@@ -54,7 +58,7 @@ public class SecurityConfig {
             .authorizeRequests()
             .requestMatchers("/api/v1/auth/**").permitAll()
             .requestMatchers("/docs/**").permitAll()
-            .requestMatchers(GET, "/api/v1/mahasiswa/**").hasRole("MAHASISWA") 
+            .requestMatchers(GET, "/api/v1/user/**").hasRole("ADMIN")
             .anyRequest().authenticated()
             .and()
             .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class); // Add JWT filter
